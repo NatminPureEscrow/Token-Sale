@@ -65,8 +65,7 @@ contract NatminTokenPreSale is Ownable {
 	// Validate if the user is on the whitelist.
 	function validPurchase() internal view returns (bool) {
 		bool _validBuyValue = msg.value >= minBuyValue;		
-		bool _validAmount = tokenContract.balanceOf(this) >= calculateTokensToBuy();
-		return _validBuyValue && _validAmount;		
+		return _validBuyValue;		
 	}
 
 	// Calculate the amount of tokens purchased with the eth amount sent.
@@ -103,12 +102,18 @@ contract NatminTokenPreSale is Ownable {
     	return tokenContract.balanceOf(this);
     }
 
+    // Get user balance for amount of tokens purchased during pre-sale
     function getPreSaleBalance(address _user) public view returns (uint256) {
     	return preSaleWallet[_user];
     }
 
     function addPreSaleBalance(address _user, uint256 _amount) internal {
     	preSaleWallet[_user] = preSaleWallet[_user].add(_amount);
+    }
+
+    // Used to reset the user's presale balance after a token transfer has been made
+    function resetPreSaleBalance(address _user) ownerOnly public {
+		preSaleWallet[_user] = 0;
     }
 
    	function transferPreSaleBalance(address _buyer) ownerOnly public {
