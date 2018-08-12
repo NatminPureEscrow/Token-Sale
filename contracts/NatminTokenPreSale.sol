@@ -15,6 +15,7 @@ contract NatminTokenPreSale is Ownable {
 	uint256 	internal 	endTime;
 
 	mapping(address => bool) whitelist;
+	mapping(address => uint256) preSaleWallet;
 
 	constructor(NatminToken _tokenContract, address _wallet) public {
 		require(_wallet != 0x0);
@@ -36,8 +37,8 @@ contract NatminTokenPreSale is Ownable {
 		require(validPurchase());
 
 		uint256 _tokenAmount = calculateTokensToBuy();
-
-		tokenContract.transfer(_buyer, _tokenAmount);		
+				
+		addPreSaleBalance(_buyer, _tokenAmount);
 		amountRaised = amountRaised.add(_value);
 		tokensSold = tokensSold.add(_tokenAmount);
 
@@ -102,4 +103,17 @@ contract NatminTokenPreSale is Ownable {
     	return tokenContract.balanceOf(this);
     }
 
+    function getPreSaleBalance(address _user) public view returns (uint256) {
+    	return preSaleWallet[_user];
+    }
+
+    function addPreSaleBalance(address _user, uint256 _amount) internal {
+    	preSaleWallet[_user] = preSaleWallet[_user].add(_amount);
+    }
+
+   	function transferPreSaleBalance(address _buyer) ownerOnly public {
+		uint256 _tokenAmount = preSaleWallet[_buyer];
+		preSaleWallet[_buyer] = 0;
+   		tokenContract.transfer(_buyer, _tokenAmount);
+   	}
 }
