@@ -9,7 +9,7 @@ contract NatminTokenSale is Ownable {
 	uint256 	constant 	tokenPrice = 50000000000000; //token price in wei = 0.00005 ether
 	uint256 	public 		tokensSold; //amount of tokens sold
 	uint256 	public 		amountRaised; //in wei
-	uint256 	internal  	minBuyValue = 100000000000000000; //in wei = 0.1 ether
+	uint256 	internal  	minBuyValue = 10000000000000000; //in wei = 0.01 ether
 	address 	internal 	wallet;
 	uint256 	internal 	startTime;
 	uint256 	internal 	endTime;
@@ -20,7 +20,7 @@ contract NatminTokenSale is Ownable {
 		require(_wallet != 0x0);
 		tokenContract = _tokenContract;
 		wallet = _wallet;
-		startTime = now + 7 days;
+		startTime = now;
 		endTime = startTime + 31 days;
 	}
 
@@ -33,7 +33,7 @@ contract NatminTokenSale is Ownable {
 	function buyTokens(address _buyer, uint256 _value) internal {
 		require(tokenSaleHasStarted());
 		require(!tokenSaleHasEnded());
-		require(validPurchase(_buyer));
+		require(validPurchase());
 
 		uint256 _tokenAmount = calculateTokensToBuy();
 
@@ -61,12 +61,10 @@ contract NatminTokenSale is Ownable {
 
 	// Validate if the amount sent is more than the minimum buy value.
 	// Validate if contract still has allocated tokens available.
-	// Validate if the user is on the whitelist.
-	function validPurchase(address _buyer) internal view returns (bool) {
+	function validPurchase() internal view returns (bool) {
 		bool _validBuyValue = msg.value >= minBuyValue;		
 		bool _validAmount = tokenContract.balanceOf(this) >= calculateTokensToBuy();
-		bool _validWhitelist = validateWhitelist(_buyer);
-		return _validBuyValue && _validAmount && _validWhitelist;		
+		return _validBuyValue && _validAmount;		
 	}
 
 	// Calculate the amount of tokens purchased with the eth amount sent.
